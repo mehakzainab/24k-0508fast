@@ -1,0 +1,161 @@
+#include <stdio.h>
+#include <string.h>
+
+
+struct Player {
+    char playerName[20];
+    char playerTeam[20];
+};
+
+struct Bowler {
+    char bowlerType[10]; 
+    char bowlingArm[6];  
+    struct Player details;
+};
+
+struct Batsman {
+    char batsmanOrder[10];  
+    char battingHand[8];   
+    struct Bowler bowlingDetails;
+};
+
+
+void initPlayer(struct Player *p, const char *name, const char *team);
+void initBowler(struct Bowler *b, const char *type, const char *arm, const char *name, const char *team);
+void initBatsman(struct Batsman *bt, const char *order, const char *hand, const char *bowlType, const char *arm, const char *name, const char *team);
+void displayPlayer(const struct Player *p);
+void displayBowler(const struct Bowler *b);
+void displayBatsman(const struct Batsman *bt);
+void savePlayerData(const char *filename, struct Player players[], int count);
+void saveBowlerData(const char *filename, struct Bowler bowlers[], int count);
+void saveBatsmanData(const char *filename, struct Batsman batsmen[], int count);
+void loadPlayerData(const char *filename, struct Player players[], int *count);
+void loadBowlerData(const char *filename, struct Bowler bowlers[], int *count);
+void loadBatsmanData(const char *filename, struct Batsman batsmen[], int *count);
+
+int main() {
+    struct Player players[5];
+    struct Bowler bowlers[3];
+    struct Batsman batsmen[2];
+    int playerCount, bowlerCount, batsmanCount;
+
+    initPlayer(&players[0], "Shaheen", "Pakistan");
+    initPlayer(&players[1], "Babar", "Pakistan");
+    initPlayer(&players[2], "Naseem", "Pakistan");
+    initPlayer(&players[3], "Hasnain", "Pakistan");
+    initPlayer(&players[4], "Virat", "India");
+
+    initBowler(&bowlers[0], "Seamer", "Right", "Joshua", "Australia");
+    initBowler(&bowlers[1], "Pacer", "Left", "David", "England");
+    initBowler(&bowlers[2], "Spinner", "Right", "Michael", "India");
+
+    initBatsman(&batsmen[0], "Top-Order", "Lefty", "Seamer", "Right", "John", "Pakistan");
+    initBatsman(&batsmen[1], "Middle-Order", "Righty", "Pacer", "Left", "James", "South Africa");
+
+    printf("Players:\n");
+    savePlayerData("players_data.txt", players, 5);
+    loadPlayerData("players_data.txt", players, &playerCount);
+    for (int i = 0; i < playerCount; i++) {
+        displayPlayer(&players[i]);
+    }
+
+    printf("\nBowlers:\n");
+    saveBowlerData("bowlers_data.txt", bowlers, 3);
+    loadBowlerData("bowlers_data.txt", bowlers, &bowlerCount);
+    for (int i = 0; i < bowlerCount; i++) {
+        displayBowler(&bowlers[i]);
+    }
+
+    printf("\nBatsmen:\n");
+    saveBatsmanData("batsmen_data.txt", batsmen, 2);
+    loadBatsmanData("batsmen_data.txt", batsmen, &batsmanCount);
+    for (int i = 0; i < batsmanCount; i++) {
+        displayBatsman(&batsmen[i]);
+    }
+
+    return 0;
+}
+
+
+void initPlayer(struct Player *p, const char *name, const char *team) {
+    strncpy(p->playerName, name, sizeof(p->playerName));
+    strncpy(p->playerTeam, team, sizeof(p->playerTeam));
+}
+
+void initBowler(struct Bowler *b, const char *type, const char *arm, const char *name, const char *team) {
+    strncpy(b->bowlerType, type, sizeof(b->bowlerType));
+    strncpy(b->bowlingArm, arm, sizeof(b->bowlingArm));
+    initPlayer(&b->details, name, team);
+}
+
+void initBatsman(struct Batsman *bt, const char *order, const char *hand, const char *bowlType, const char *arm, const char *name, const char *team) {
+    strncpy(bt->batsmanOrder, order, sizeof(bt->batsmanOrder));
+    strncpy(bt->battingHand, hand, sizeof(bt->battingHand));
+    initBowler(&bt->bowlingDetails, bowlType, arm, name, team);
+}
+
+void displayPlayer(const struct Player *p) {
+    printf("Name: %s, Team: %s\n", p->playerName, p->playerTeam);
+}
+
+void displayBowler(const struct Bowler *b) {
+    printf("Bowler Type: %s, Arm: %s\n", b->bowlerType, b->bowlingArm);
+    displayPlayer(&b->details);
+}
+
+void displayBatsman(const struct Batsman *bt) {
+    printf("Batsman Order: %s, Hand: %s\n", bt->batsmanOrder, bt->battingHand);
+    displayBowler(&bt->bowlingDetails);
+}
+
+
+void savePlayerData(const char *filename, struct Player players[], int count) {
+    FILE *file = fopen(filename, "w");
+    for (int i = 0; i < count; i++) {
+        fprintf(file, "%s %s\n", players[i].playerName, players[i].playerTeam);
+    }
+    fclose(file);
+}
+
+void saveBowlerData(const char *filename, struct Bowler bowlers[], int count) {
+    FILE *file = fopen(filename, "w");
+    for (int i = 0; i < count; i++) {
+        fprintf(file, "%s %s %s %s\n", bowlers[i].bowlerType, bowlers[i].bowlingArm, bowlers[i].details.playerName, bowlers[i].details.playerTeam);
+    }
+    fclose(file);
+}
+
+void saveBatsmanData(const char *filename, struct Batsman batsmen[], int count) {
+    FILE *file = fopen(filename, "w");
+    for (int i = 0; i < count; i++) {
+        fprintf(file, "%s %s %s %s %s %s\n", batsmen[i].batsmanOrder, batsmen[i].battingHand, batsmen[i].bowlingDetails.bowlerType, batsmen[i].bowlingDetails.bowlingArm, batsmen[i].bowlingDetails.details.playerName, batsmen[i].bowlingDetails.details.playerTeam);
+    }
+    fclose(file);
+}
+
+void loadPlayerData(const char *filename, struct Player players[], int *count) {
+    FILE *file = fopen(filename, "r");
+    *count = 0;
+    while (fscanf(file, "%s %s", players[*count].playerName, players[*count].playerTeam) != EOF) {
+        (*count)++;
+    }
+    fclose(file);
+}
+
+void loadBowlerData(const char *filename, struct Bowler bowlers[], int *count) {
+    FILE *file = fopen(filename, "r");
+    *count = 0;
+    while (fscanf(file, "%s %s %s %s", bowlers[*count].bowlerType, bowlers[*count].bowlingArm, bowlers[*count].details.playerName, bowlers[*count].details.playerTeam) != EOF) {
+        (*count)++;
+    }
+    fclose(file);
+}
+
+void loadBatsmanData(const char *filename, struct Batsman batsmen[], int *count) {
+    FILE *file = fopen(filename, "r");
+    *count = 0;
+    while (fscanf(file, "%s %s %s %s %s %s", batsmen[*count].batsmanOrder, batsmen[*count].battingHand, batsmen[*count].bowlingDetails.bowlerType, batsmen[*count].bowlingDetails.bowlingArm, batsmen[*count].bowlingDetails.details.playerName, batsmen[*count].bowlingDetails.details.playerTeam) != EOF) {
+        (*count)++;
+    }
+    fclose(file);
+}
