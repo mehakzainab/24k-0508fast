@@ -1,0 +1,88 @@
+#include <stdio.h>
+#include <string.h>
+
+
+struct Date {
+    int day;
+    int month;
+    int year;
+};
+
+
+struct Employee {
+    int code;
+    char name[20];
+    struct Date joiningDate;
+};
+
+
+struct Employee employees[4];
+int employeeCount = 0;
+
+void processTenure(struct Employee*);
+int collectEmployeeData();
+
+int main() {
+   
+    while (employeeCount < 4) {
+        collectEmployeeData();
+    }
+
+   
+    processTenure(employees);
+
+    return 0;
+}
+
+
+int collectEmployeeData() {
+    if (employeeCount == 4) {
+        printf("Employee list is full!\n");
+        return 0;
+    }
+
+    printf("Enter Employee Code: ");
+    scanf("%d", &employees[employeeCount].code);
+
+    printf("Enter Employee Name: ");
+    getchar(); // Clear the newline left by the previous input
+    fgets(employees[employeeCount].name, sizeof(employees[employeeCount].name), stdin);
+
+  
+    employees[employeeCount].name[strcspn(employees[employeeCount].name, "\n")] = '\0';
+
+    printf("Enter Date of Joining (Day Month Year): ");
+    scanf("%d %d %d", 
+          &employees[employeeCount].joiningDate.day, 
+          &employees[employeeCount].joiningDate.month, 
+          &employees[employeeCount].joiningDate.year);
+
+    printf("\nEmployee %d Added\n\n", employeeCount + 1);
+    employeeCount++;
+    return 0;
+}
+
+
+void processTenure(struct Employee* employees) {
+    int employeesWithLongTenure = 0;
+    struct Date currentDate = {18, 11, 2024};
+    int yearDifference;
+
+    for (int i = 0; i < employeeCount; i++) {
+        yearDifference = currentDate.year - employees[i].joiningDate.year;
+
+        if (yearDifference > 3) {
+            printf("\nEmployee Code: %d\n"
+                   "Employee Name: %s\n"
+                   "Date of Joining: %02d/%02d/%04d\n", 
+                   employees[i].code, 
+                   employees[i].name, 
+                   employees[i].joiningDate.day, 
+                   employees[i].joiningDate.month, 
+                   employees[i].joiningDate.year);
+            employeesWithLongTenure++;
+        }
+    }
+
+    printf("\nTotal Number of Employees with Tenure Over 3 Years: %d\n", employeesWithLongTenure);
+}
